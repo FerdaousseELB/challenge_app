@@ -19,4 +19,13 @@ class Vente {
       heureDeVente: DateTime.parse(json['heure_de_vente']), // Convertir la chaîne de caractères en DateTime
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'produit_id': produitId,
+      'vendeur_id': vendeurId,
+      'heure_de_vente': heureDeVente.toUtc().toIso8601String(),
+    };
+  }
 }
