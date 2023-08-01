@@ -38,7 +38,8 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     final vendeur = await VendeurService.getVendeurByEmail(email);
 
     if (vendeur != null) {
-      final currentMonthYear = DateTime.now().toString().substring(0, 7);
+      final currentDate = DateTime.now();
+      final currentMonthYear = '${currentDate.month.toString().padLeft(2, '0')}${currentDate.year}';
 
       setState(() {
         _cagnotteMoisEnCours = vendeur.cagnottes[currentMonthYear];
