@@ -2,7 +2,7 @@ class Vendeur {
   final int id;
   final String nom;
   final String mail;
-  final String pointDeVenteId;
+  final int pointDeVenteId;
   final Map<String, double> cagnottes; // Utiliser des doubles pour les valeurs de cagnottes
 
   Vendeur({

@@ -20,7 +20,7 @@ class VendeurService {
 
   static Future<Vendeur?> getVendeurByEmail(String email) async {
     final vendeurs = await fetchVendeurs();
-    final vendeur = vendeurs.firstWhere((vendeur) => vendeur.mail == email, orElse: () => Vendeur(id: -1, nom: "", mail: "", pointDeVenteId: "", cagnottes: {}));
+    final vendeur = vendeurs.firstWhere((vendeur) => vendeur.mail == email, orElse: () => Vendeur(id: -1, nom: "", mail: "", pointDeVenteId: 0, cagnottes: {}));
     return vendeur.id != -1 ? vendeur : null;
   }
 

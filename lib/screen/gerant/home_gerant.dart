@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import '../../model/gerant_model.dart';
+import '../../model/produit_model.dart';
 import '../../model/vendeur_model.dart';
+import 'package:http/http.dart' as http;
+
+import '../../service/produit_service.dart';
 
 class HomeGerantPage extends StatefulWidget {
   @override
@@ -10,79 +16,67 @@ class HomeGerantPage extends StatefulWidget {
 
 class _HomeGerantPageState extends State<HomeGerantPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final DatabaseReference ref = FirebaseDatabase.instance.ref();
   List<Vendeur> _listeDesVendeurs = [];
+  List<Produit> _listeDesProduits = [];
 
   @override
   void initState() {
     super.initState();
     _fetchVendeurs();
+    _fetchProduits();
   }
 
   // Méthode pour récupérer les vendeurs associés au gérant connecté
   Future<void> _fetchVendeurs() async {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
+    int poindDeVente = 0;
 
     final emailParts = email.split("@");
     final emailStart = emailParts.length > 0 ? emailParts[0] : "";
 
     try {
-      final event = await ref.child('gerants').orderByChild('mail').equalTo(email).once();
-      final gerantData = event.snapshot.value;
 
-      if (gerantData == null) {
-        print('Gérant non trouvé dans la base de données.');
-        return;
+      final apiUrlGerant = 'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/gerants.json?orderBy="mail"&equalTo="$email"';
+      final responseGerant = await http.get(Uri.parse(apiUrlGerant));
+      if (responseGerant.statusCode == 200) {
+        final Map<String, dynamic> jsonDataGerant = json.decode(responseGerant.body);
+        final List<dynamic>? gerants = jsonDataGerant.values.toList();
+
+        if (gerants != null) poindDeVente = gerants[0]['point_de_vente_id'];
       }
+      final apiUrl = 'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs.json?orderBy="point_de_vente_id"&equalTo=$poindDeVente';
 
-      List<dynamic> gerantList;
-      if (gerantData is List<dynamic>) {
-        gerantList = gerantData;
-      } else if (gerantData is Map<String, dynamic>) {
-        gerantList = gerantData.values.toList();
-      } else {
-        gerantList = [];
-      }
+      final response = await http.get(Uri.parse(apiUrl));
 
-      final gerant = gerantList.firstWhere((element) => element != null, orElse: () => null);
-
-      if (gerant != null) {
-        final pointDeVenteId = gerant['point_de_vente_id'];
-        final event = await ref.child('vendeurs').orderByChild('point_de_vente_id').equalTo(pointDeVenteId).get();
-
-        if (event.exists) {
-          final vendeurList = (event.value as Map<String, dynamic>).values.toList();
-          _listeDesVendeurs = vendeurList.map((vendeurData) => _createVendeurFromData(vendeurData)).toList();
+      if (response.statusCode == 200) {
+        // La requête s'est bien passée, vous pouvez maintenant convertir les données JSON en une liste d'objets Vendeur
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        final List<dynamic> data = jsonData.values.toList();
+        if (data != null) {
+          final List<Vendeur> vendeurs = data
+              .where((item) => item != null)
+              .map((item) => Vendeur.fromJson(item))
+              .toList();
+          _listeDesVendeurs = vendeurs;
           setState(() {});
-        } else {
-          print('No data available.');
         }
+      } else {
+        print('Échec de la requête : ${response.statusCode}');
       }
     } catch (error) {
       print('Erreur lors de la récupération des données : $error');
     }
   }
 
-  Vendeur _createVendeurFromData(Map<dynamic, dynamic> vendeurData) {
-    final cagnottesJson = vendeurData['cagnottes'] as Map<dynamic, dynamic>;
-    final Map<String, double> cagnottes = {};
-
-    if (cagnottesJson != null) {
-      cagnottesJson.forEach((key, value) {
-        if (key is String && value is num) {
-          cagnottes[key] = value.toDouble();
-        }
-      });
+  List<Vendeur> transferList(List<dynamic> dataList) {
+    List<Vendeur> vendeurs = [];
+    for (var data in dataList) {
+      // Utilisez la méthode fromJson pour créer une instance de Vendeur à partir des données JSON
+      Vendeur vendeur = Vendeur.fromJson(data);
+      vendeurs.add(vendeur);
     }
-
-    return Vendeur(
-      id: vendeurData['ID'],
-      nom: vendeurData['nom'],
-      mail: vendeurData['mail'],
-      pointDeVenteId: vendeurData['point_de_vente_id'],
-      cagnottes: cagnottes,
-    );
+    return vendeurs;
   }
 
   // Méthode pour construire l'AppBar
@@ -158,6 +152,80 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
     );
   }
 
+  Future<void> _fetchProduits() async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits.json'));
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = json.decode(response.body);
+      if (data != null) {
+        final nonNullData = data.where((item) => item != null).toList();
+        final List<Produit> produits = nonNullData.map((item) => Produit.fromJson(item)).toList();
+        _listeDesProduits =  produits;
+      }
+    }
+  }
+
+  // Méthode pour construire le rectangle pour chaque vendeur
+  Widget _buildVendeurRectangle(Vendeur vendeur) {
+    return Container(
+      width: 200, // Réduire la largeur du rectangle
+      padding: EdgeInsets.all(16),
+      margin: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1ère ligne : Nom du vendeur
+          Center( // Centrer le texte
+            child: Text(
+              vendeur.nom,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+
+          // 2ème ligne : Noms des produits
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var produit in _listeDesProduits)
+                Text(
+                  produit.nom,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
+          SizedBox(height: 8),
+
+          // 3ème ligne : Nombre de ventes pour chaque produit
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var produit in _listeDesProduits)
+                Text(
+                  '${vendeur.cagnottes[produit.id.toString()] ?? 0}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -175,13 +243,7 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
           itemCount: _listeDesVendeurs.length,
           itemBuilder: (context, index) {
             final vendeur = _listeDesVendeurs[index];
-            return ListTile(
-              title: Text(vendeur.nom),
-              subtitle: Text(vendeur.mail),
-              onTap: () {
-                // Mettez ici la logique pour gérer la navigation vers la page du vendeur
-              },
-            );
+            return _buildVendeurRectangle(vendeur);
           },
         ),
       ),
