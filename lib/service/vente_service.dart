@@ -35,9 +35,13 @@ class VenteService {
   }
 
   static Future<void> addVente(Vente vente) async {
-    await http.post(
-      Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json'),
-      body: json.encode(vente.toJson()),
-    );
+    final newData = {
+      'ID': vente.id,
+      'produit_id': vente.produitId,
+      'vendeur_id': vente.vendeurId,
+      'heure_de_vente': vente.heureDeVente.toUtc().toIso8601String()
+    };
+    await http.put(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes/${vente.id}.json'), body: json.encode(newData));
+
   }
 }

@@ -72,14 +72,14 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
 
       await VenteService.addVente(nouvelleVente);
 
-      final moisEnCours = DateTime.now().toString().substring(0, 7);
+      final moisEnCours = '${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}';
+
       final nouvelleCagnotte = (vendeur.cagnottes[moisEnCours] ?? 0) + 2.5;
       await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte);
 
-      final nombreVentes = await VenteService.getNombreVentes(produit.id, vendeur.id);
-
       setState(() {
         vendeur.cagnottes[moisEnCours] = nouvelleCagnotte;
+        _cagnotteMoisEnCours = nouvelleCagnotte;
       });
     }
   }

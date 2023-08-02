@@ -25,9 +25,22 @@ class VendeurService {
   }
 
   static Future<void> updateCagnotte(int vendeurId, String mois, double nouvelleCagnotte) async {
-    await http.patch(
-      Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs/$vendeurId.json'),
-      body: json.encode({"cagnottes": {mois: nouvelleCagnotte}}),
-    );
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs/$vendeurId.json'));
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final cagnottes = responseData['cagnottes'] as Map<String, dynamic>;
+
+      // Mettre à jour la cagnotte pour le mois spécifié
+      cagnottes[mois] = nouvelleCagnotte;
+
+      // Envoyer les cagnottes mises à jour à Firebase
+      await http.patch(
+        Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs/$vendeurId.json'),
+        body: json.encode({"cagnottes": cagnottes}),
+      );
+    } else {
+      throw Exception('Failed to update cagnotte.');
+    }
   }
+
 }

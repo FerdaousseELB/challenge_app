@@ -2,13 +2,13 @@ class Vente {
   final int id;
   final int produitId;
   final int vendeurId;
-  final DateTime heureDeVente; // Mettre à jour le type de propriété en DateTime
+  final DateTime heureDeVente;
 
   Vente({
     required this.id,
     required this.produitId,
     required this.vendeurId,
-    required this.heureDeVente, // Mettre à jour le type de propriété en DateTime
+    required this.heureDeVente,
   });
 
   factory Vente.fromJson(Map<String, dynamic> json) {
@@ -16,7 +16,7 @@ class Vente {
       id: json['ID'],
       produitId: json['produit_id'],
       vendeurId: json['vendeur_id'],
-      heureDeVente: DateTime.parse(json['heure_de_vente']), // Convertir la chaîne de caractères en DateTime
+      heureDeVente: DateTime.parse(json['heure_de_vente']),
     );
   }
 

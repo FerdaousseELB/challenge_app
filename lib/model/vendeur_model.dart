@@ -14,11 +14,17 @@ class Vendeur {
   });
 
   factory Vendeur.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> cagnottesJson = json['cagnottes'];
+    final Map<String, dynamic>? cagnottesJson = json['cagnottes'];
     final Map<String, double> cagnottes = {};
-    cagnottesJson.forEach((key, value) {
-      cagnottes[key] = value.toDouble(); // Convertir la valeur en double
-    });
+
+    // Vérifier si 'cagnottesJson' est nul ou non
+    if (cagnottesJson != null) {
+      cagnottesJson.forEach((key, value) {
+        if (value is double || value is int) {
+          cagnottes[key] = value.toDouble(); // Convertir la valeur en double
+        }
+      });
+    }
 
     return Vendeur(
       id: json['ID'],
@@ -28,4 +34,5 @@ class Vendeur {
       cagnottes: cagnottes,
     );
   }
+
 }
