@@ -1,13 +1,13 @@
-import 'package:challenge_app/model/produit_model.dart';
-import 'package:challenge_app/model/vendeur_model.dart';
-import 'package:challenge_app/model/vente_model.dart';
-import 'package:challenge_app/screen/vendeur/screen_cagnotte.dart';
-import 'package:challenge_app/screen/vendeur/screen_vente.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../service/produit_service.dart';
 import '../../service/vendeur_service.dart';
 import '../../service/vente_service.dart';
+import 'package:challenge_app/model/produit_model.dart';
+import 'package:challenge_app/model/vendeur_model.dart';
+import 'package:challenge_app/model/vente_model.dart';
+import 'package:challenge_app/screen/vendeur/screen_cagnotte.dart';
+import 'package:challenge_app/screen/vendeur/screen_vente.dart';
 
 class HomeVendeurPage extends StatefulWidget {
   @override
@@ -18,7 +18,8 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Produit> _products = [];
   double? _cagnotteMoisEnCours;
-  late final int vendeurId;
+  late int vendeurId;
+  bool _isUpdatingCagnotte = false; // Nouvelle variable pour indiquer si la cagnotte est en cours de mise à jour
 
   @override
   void initState() {
@@ -58,33 +59,40 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     final vendeur = await VendeurService.getVendeurByEmail(email);
 
     if (vendeur != null) {
-      final ventes = await VenteService.fetchVentes();
+      if (!_isUpdatingCagnotte) { // Vérifier si la cagnotte n'est pas en cours de mise à jour
+        setState(() {
+          _isUpdatingCagnotte = true; // Mettre à jour le booléen pour indiquer que la cagnotte est en cours de mise à jour
+        });
 
-      int maxId = 0;
-      for (var vente in ventes) {
-        if (vente.id > maxId) {
-          maxId = vente.id;
+        final ventes = await VenteService.fetchVentes();
+
+        int maxId = 0;
+        for (var vente in ventes) {
+          if (vente.id > maxId) {
+            maxId = vente.id;
+          }
         }
+
+        final nouvelleVente = Vente(
+          id: maxId + 1,
+          produitId: produit.id,
+          vendeurId: vendeur.id,
+          heureDeVente: DateTime.now().toUtc(),
+        );
+
+        await VenteService.addVente(nouvelleVente);
+
+        final moisEnCours = '${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}';
+
+        final nouvelleCagnotte = (vendeur.cagnottes[moisEnCours] ?? 0) + 2.5;
+        await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte);
+
+        setState(() {
+          vendeur.cagnottes[moisEnCours] = nouvelleCagnotte;
+          _cagnotteMoisEnCours = nouvelleCagnotte;
+          _isUpdatingCagnotte = false; // Mettre à jour le booléen pour indiquer que la cagnotte a fini d'être mise à jour
+        });
       }
-
-      final nouvelleVente = Vente(
-        id: maxId + 1,
-        produitId: produit.id,
-        vendeurId: vendeur.id,
-        heureDeVente: DateTime.now().toUtc(),
-      );
-
-      await VenteService.addVente(nouvelleVente);
-
-      final moisEnCours = '${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}';
-
-      final nouvelleCagnotte = (vendeur.cagnottes[moisEnCours] ?? 0) + 2.5;
-      await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte);
-
-      setState(() {
-        vendeur.cagnottes[moisEnCours] = nouvelleCagnotte;
-        _cagnotteMoisEnCours = nouvelleCagnotte;
-      });
     }
   }
 
@@ -250,6 +258,9 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                                   onPressed: () {
                                     _addVente(produit);
                                   },
+                                  // Désactiver le bouton d'ajout de vente pendant la mise à jour de la cagnotte
+                                  // en vérifiant la valeur de _isUpdatingCagnotte
+                                  disabledColor: _isUpdatingCagnotte ? Colors.grey : null,
                                 ),
                               ],
                             );
@@ -285,4 +296,3 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     );
   }
 }
-
