@@ -1,3 +1,5 @@
+import 'package:challenge_app/screen/vendeur/screen_cagnotte.dart';
+import 'package:challenge_app/screen/vendeur/screen_vente.dart';
 import 'package:flutter/material.dart';
 import 'screen/gerant/home_gerant.dart';
 import 'screen/vendeur/home_vendeur.dart';
@@ -28,6 +30,8 @@ class ChallengeApp extends StatelessWidget {
         '/login_vendeur': (context) => LoginVendeurPage(),
         '/home_gerant': (context) => HomeGerantPage(),
         '/home_vendeur': (context) => HomeVendeurPage(),
+        '/screenCagnotte': (context) => ScreenCagnotte(vendeurId: 0),
+        '/screenVente': (context) => ScreenVente(vendeurId: 0),
       },
     );
   }

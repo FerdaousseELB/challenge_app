@@ -44,4 +44,34 @@ class VenteService {
     await http.put(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes/${vente.id}.json'), body: json.encode(newData));
 
   }
+
+  static Future<List<Vente>> fetchVentesByVendeurId(int vendeurId) async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as List<dynamic>;
+      final List<Vente> ventes = [];
+
+      if (data != null) {
+        for (var entry in data) {
+          if (entry != null && entry is Map) {
+            final vente = Vente(
+              id: entry['ID'],
+              produitId: entry['produit_id'],
+              vendeurId: entry['vendeur_id'],
+              heureDeVente: DateTime.parse(entry['heure_de_vente']),
+            );
+
+            if (vente.vendeurId == vendeurId) {
+              ventes.add(vente);
+            }
+          }
+        }
+      }
+
+      return ventes;
+    } else {
+      throw Exception('Failed to fetch ventes');
+    }
+  }
 }

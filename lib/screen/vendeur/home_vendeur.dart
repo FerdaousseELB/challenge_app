@@ -1,6 +1,8 @@
 import 'package:challenge_app/model/produit_model.dart';
 import 'package:challenge_app/model/vendeur_model.dart';
 import 'package:challenge_app/model/vente_model.dart';
+import 'package:challenge_app/screen/vendeur/screen_cagnotte.dart';
+import 'package:challenge_app/screen/vendeur/screen_vente.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../service/produit_service.dart';
@@ -16,12 +18,14 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<Produit> _products = [];
   double? _cagnotteMoisEnCours;
+  late final int vendeurId;
 
   @override
   void initState() {
     super.initState();
     _fetchProducts();
     _fetchCagnotteMoisEnCours();
+    _fetchVendeurId();
   }
 
   Future<void> _fetchProducts() async {
@@ -97,6 +101,21 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     return vendeur.id;
   }
 
+  Future<void> _fetchVendeurId() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email ?? "";
+
+    final vendeurs = await VendeurService.fetchVendeurs();
+    final vendeur = vendeurs.firstWhere(
+          (vendeur) => vendeur.mail == email,
+      orElse: () => Vendeur(id: -1, nom: "", mail: "", pointDeVenteId: 0, cagnottes: {}),
+    );
+
+    setState(() {
+      vendeurId = vendeur.id;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -160,14 +179,20 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
               leading: Icon(Icons.shopping_cart),
               title: Text('Ventes'),
               onTap: () {
-                // Mettez ici la logique pour gérer la navigation vers la page des ventes du vendeur
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScreenVente(vendeurId: vendeurId)),
+                );
               },
             ),
             ListTile(
               leading: Icon(Icons.monetization_on),
               title: Text('Cagnottes'),
               onTap: () {
-                // Mettez ici la logique pour gérer la navigation vers la page des cagnottes du vendeur
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScreenCagnotte(vendeurId: vendeurId)),
+                );
               },
             ),
           ],
