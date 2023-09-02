@@ -8,6 +8,10 @@ import '../../model/vendeur_model.dart';
 import '../../service/vente_service.dart';
 
 class HomeGerantPage extends StatefulWidget {
+  final String? token;
+
+  HomeGerantPage({this.token});
+
   @override
   _HomeGerantPageState createState() => _HomeGerantPageState();
 }
@@ -21,18 +25,18 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
   @override
   void initState() {
     super.initState();
-    _fetchVendeurs();
-    _fetchProduits();
+    _fetchVendeurs(widget.token);
+    _fetchProduits(widget.token);
   }
 
-  Future<void> _fetchVendeurs() async {
+  Future<void> _fetchVendeurs(String? token) async {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
     int poindDeVente = 0;
 
     try {
       final apiUrlGerant =
-          'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/gerants.json?orderBy="mail"&equalTo="$email"';
+          'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/gerants.json?auth=$token&orderBy="mail"&equalTo="$email"';
       final responseGerant = await http.get(Uri.parse(apiUrlGerant));
       if (responseGerant.statusCode == 200) {
         final Map<String, dynamic> jsonDataGerant =
@@ -42,7 +46,7 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
         if (gerants != null) poindDeVente = gerants[0]['point_de_vente_id'];
       }
       final apiUrl =
-          'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs.json?orderBy="point_de_vente_id"&equalTo=$poindDeVente';
+          'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs.json?auth=$token&orderBy="point_de_vente_id"&equalTo=$poindDeVente';
 
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -66,10 +70,10 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
     }
   }
 
-  Future<void> _fetchProduits() async {
+  Future<void> _fetchProduits(String? token) async {
     final response = await http.get(
         Uri.parse(
-            'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits.json'));
+            'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits.json?auth=$token'));
     if (response.statusCode == 200) {
       final List<dynamic>? data = json.decode(response.body);
       if (data != null) {
@@ -233,7 +237,7 @@ class _HomeGerantPageState extends State<HomeGerantPage> {
             children: [
               for (var produit in _listeDesProduits)
                 FutureBuilder<int>(
-                  future: VenteService.getNombreVentes(produit.id, vendeur.id),
+                  future: VenteService.getNombreVentes(produit.id, vendeur.id, widget.token),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // Afficher un indicateur de chargement pendant la récupération des données

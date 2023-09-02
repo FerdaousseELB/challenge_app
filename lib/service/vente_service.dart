@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class VenteService {
-  static Future<List<Vente>> fetchVentes() async {
-    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json'));
+  static Future<List<Vente>> fetchVentes(String? token) async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json?auth=$token'));
     if (response.statusCode == 200) {
       final List<dynamic>? data = json.decode(response.body);
       if (data != null) {
@@ -18,8 +18,8 @@ class VenteService {
     return [];
   }
 
-  static Future<int> getNombreVentes(int produitId, int vendeurId) async {
-    final ventes = await fetchVentes();
+  static Future<int> getNombreVentes(int produitId, int vendeurId, String? token) async {
+    final ventes = await fetchVentes(token);
     final currentDate = DateTime.now();
     final firstDayOfMonth = DateTime(currentDate.year, currentDate.month, 1);
 
@@ -34,19 +34,19 @@ class VenteService {
     return nombreVentes;
   }
 
-  static Future<void> addVente(Vente vente) async {
+  static Future<void> addVente(Vente vente, String? token) async {
     final newData = {
       'ID': vente.id,
       'produit_id': vente.produitId,
       'vendeur_id': vente.vendeurId,
       'heure_de_vente': vente.heureDeVente.toUtc().toIso8601String()
     };
-    await http.put(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes/${vente.id}.json'), body: json.encode(newData));
+    await http.put(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes/${vente.id}.json?auth=$token'), body: json.encode(newData));
 
   }
 
-  static Future<List<Vente>> fetchVentesByVendeurId(int vendeurId) async {
-    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json'));
+  static Future<List<Vente>> fetchVentesByVendeurId(int vendeurId, String? token) async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json?auth=$token'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as List<dynamic>;

@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ProduitService {
-  static Future<List<Produit>> fetchProduits() async {
-    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits.json'));
+  static Future<List<Produit>> fetchProduits(String? token) async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits.json?auth=$token'));
     if (response.statusCode == 200) {
       final List<dynamic>? data = json.decode(response.body);
       if (data != null) {
@@ -16,8 +16,8 @@ class ProduitService {
     return [];
   }
 
-  static Future<String?> getProduitNomById(int produitId) async {
-    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits/$produitId.json'));
+  /*static Future<String?> getProduitNomById(int produitId, String? token) async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/produits/$produitId.json?auth=$token'));
     if (response.statusCode == 200) {
       final produitData = json.decode(response.body);
       return produitData['nom'];
@@ -25,5 +25,5 @@ class ProduitService {
       // Gérer les erreurs ou renvoyer une valeur par défaut
       return null;
     }
-  }
+  }*/
 }

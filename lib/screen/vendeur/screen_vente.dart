@@ -6,8 +6,9 @@ import 'package:challenge_app/service/produit_service.dart';
 
 class ScreenVente extends StatefulWidget {
   final int vendeurId;
+  final String? token;
 
-  ScreenVente({required this.vendeurId});
+  ScreenVente({required this.vendeurId, this.token});
 
   @override
   _ScreenVenteState createState() => _ScreenVenteState();
@@ -25,14 +26,14 @@ class _ScreenVenteState extends State<ScreenVente> {
   }
 
   Future<void> _fetchProduits() async {
-    final produits = await ProduitService.fetchProduits();
+    final produits = await ProduitService.fetchProduits(widget.token);
     setState(() {
       _produits.addAll(produits);
     });
   }
 
   Future<void> _fetchVentes() async {
-    final ventes = await VenteService.fetchVentesByVendeurId(widget.vendeurId);
+    final ventes = await VenteService.fetchVentesByVendeurId(widget.vendeurId, widget.token);
     setState(() {
       _ventes.addAll(ventes);
     });

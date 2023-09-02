@@ -2,9 +2,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginGerantService {
-  static Future<bool> isUserGerant(String userEmail) async {
+  static Future<bool> isUserGerant(String userEmail, String? token) async {
     final response =
-    await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/gerants.json'));
+    await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/gerants.json?auth=$token'));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data is List) {

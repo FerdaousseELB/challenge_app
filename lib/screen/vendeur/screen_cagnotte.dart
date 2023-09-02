@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ScreenCagnotte extends StatefulWidget {
   final int vendeurId;
-  ScreenCagnotte({required this.vendeurId});
+  final String? token;
+  ScreenCagnotte({required this.vendeurId, this.token});
   @override
   _ScreenCagnotteState createState() => _ScreenCagnotteState();
 }
@@ -22,7 +23,7 @@ class _ScreenCagnotteState extends State<ScreenCagnotte> {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
 
-    final vendeur = await VendeurService.getVendeurByEmail(email);
+    final vendeur = await VendeurService.getVendeurByEmail(email, widget.token);
 
     if (vendeur != null) {
       setState(() {

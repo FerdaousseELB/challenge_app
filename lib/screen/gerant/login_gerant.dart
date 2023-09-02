@@ -77,14 +77,23 @@ class _LoginGerantPageState extends State<LoginGerantPage> {
       );
 
       if (userCredential.user != null) {
-        final bool isGerant = await LoginGerantService.isUserGerant(email);
-        if (isGerant) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeGerantPage()));
-        } else {
-          setState(() {
-            _errorMessage = 'Vous n\'avez pas l\'autorisation d\'accéder à cette application en tant que gérant.';
-          });
+        final User? user = userCredential.user;
+        if (user != null) {
+          final String? token = await user.getIdToken();
+          if (token != null) {
+            final bool isGerant = await LoginGerantService.isUserGerant(email, token);
+            if (isGerant) {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeGerantPage(token: token)));
+            } else {
+              setState(() {
+                _errorMessage = 'Vous n\'avez pas l\'autorisation d\'accéder à cette application en tant que gérant.';
+              });
+            }
+          }
         }
+
+
+
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

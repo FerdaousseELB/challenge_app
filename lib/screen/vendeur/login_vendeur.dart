@@ -76,30 +76,30 @@ class _LoginVendeurPageState extends State<LoginVendeurPage> {
         password: password,
       );
 
-      if (userCredential.user != null) {
-        final bool isVendeur = await LoginVendeurService.isUserVendeur(email);
-        if (isVendeur) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeVendeurPage()));
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        final String? token = await user.getIdToken();
+
+        if (token != null) {
+          final bool isVendeur = await LoginVendeurService.isUserVendeur(email, token);
+          if (isVendeur) {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeVendeurPage(token: token)));
+          } else {
+            setState(() {
+              _errorMessage = 'Vous n\'avez pas l\'autorisation d\'accéder à cette application en tant que vendeur.';
+            });
+          }
         } else {
           setState(() {
-            _errorMessage = 'Vous n\'avez pas l\'autorisation d\'accéder à cette application en tant que vendeur.';
+            _errorMessage = 'Token is null.';
           });
         }
       }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        setState(() {
-          _errorMessage = 'No user found for that email.';
-        });
-      } else if (e.code == 'wrong-password') {
-        setState(() {
-          _errorMessage = 'Wrong password provided for that user.';
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Error: ${e.message}';
-        });
-      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error: $e';
+      });
     }
   }
 }

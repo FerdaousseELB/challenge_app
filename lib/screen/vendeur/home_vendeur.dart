@@ -10,6 +10,10 @@ import 'package:challenge_app/screen/vendeur/screen_cagnotte.dart';
 import 'package:challenge_app/screen/vendeur/screen_vente.dart';
 
 class HomeVendeurPage extends StatefulWidget {
+  final String? token; // Déclarez le paramètre token
+
+  HomeVendeurPage({this.token}); // Ajoutez un constructeur qui prend le paramètre token
+
   @override
   _HomeVendeurPageState createState() => _HomeVendeurPageState();
 }
@@ -30,7 +34,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
   }
 
   Future<void> _fetchProducts() async {
-    final produits = await ProduitService.fetchProduits();
+    final produits = await ProduitService.fetchProduits(widget.token);
     setState(() {
       _products.addAll(produits);
     });
@@ -40,7 +44,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
 
-    final vendeur = await VendeurService.getVendeurByEmail(email);
+    final vendeur = await VendeurService.getVendeurByEmail(email, widget.token);
 
     if (vendeur != null) {
       final currentDate = DateTime.now();
@@ -56,7 +60,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
 
-    final vendeur = await VendeurService.getVendeurByEmail(email);
+    final vendeur = await VendeurService.getVendeurByEmail(email, widget.token);
 
     if (vendeur != null) {
       if (!_isUpdatingCagnotte) { // Vérifier si la cagnotte n'est pas en cours de mise à jour
@@ -64,7 +68,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
           _isUpdatingCagnotte = true; // Mettre à jour le booléen pour indiquer que la cagnotte est en cours de mise à jour
         });
 
-        final ventes = await VenteService.fetchVentes();
+        final ventes = await VenteService.fetchVentes(widget.token);
 
         int maxId = 0;
         for (var vente in ventes) {
@@ -80,12 +84,12 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
           heureDeVente: DateTime.now().toUtc(),
         );
 
-        await VenteService.addVente(nouvelleVente);
+        await VenteService.addVente(nouvelleVente, widget.token);
 
         final moisEnCours = '${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}';
 
         final nouvelleCagnotte = (vendeur.cagnottes[moisEnCours] ?? 0) + 2.5;
-        await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte);
+        await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte, widget.token);
 
         setState(() {
           vendeur.cagnottes[moisEnCours] = nouvelleCagnotte;
@@ -101,7 +105,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
   }
 
   Future<int> _fetchVendeurIdByEmail(String email) async {
-    final vendeurs = await VendeurService.fetchVendeurs();
+    final vendeurs = await VendeurService.fetchVendeurs(widget.token);
     final vendeur = vendeurs.firstWhere(
           (vendeur) => vendeur.mail == email,
       orElse: () => Vendeur(id: -1, nom: "", mail: "", pointDeVenteId: 0, cagnottes: {}),
@@ -113,7 +117,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
 
-    final vendeurs = await VendeurService.fetchVendeurs();
+    final vendeurs = await VendeurService.fetchVendeurs(widget.token);
     final vendeur = vendeurs.firstWhere(
           (vendeur) => vendeur.mail == email,
       orElse: () => Vendeur(id: -1, nom: "", mail: "", pointDeVenteId: 0, cagnottes: {}),
@@ -189,7 +193,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ScreenVente(vendeurId: vendeurId)),
+                  MaterialPageRoute(builder: (context) => ScreenVente(vendeurId: vendeurId, token: widget.token)),
                 );
               },
             ),
@@ -199,7 +203,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ScreenCagnotte(vendeurId: vendeurId)),
+                  MaterialPageRoute(builder: (context) => ScreenCagnotte(vendeurId: vendeurId, token: widget.token)),
                 );
               },
             ),
@@ -220,7 +224,10 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.shopping_bag),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('images/${produit.nom}.jpg'),
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -232,7 +239,7 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                       FutureBuilder<int>(
                         future: () async {
                           int vendeurId = await _fetchVendeurIdByEmail(email);
-                          return VenteService.getNombreVentes(produit.id, vendeurId);
+                          return VenteService.getNombreVentes(produit.id, vendeurId, widget.token);
                         }(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
