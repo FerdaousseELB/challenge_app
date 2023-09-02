@@ -194,7 +194,11 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ScreenVente(vendeurId: vendeurId, token: widget.token)),
-                );
+                ).then((_) {
+                  // Cette fonction sera appelée lorsque vous reviendrez de la page ScreenVente
+                  // Vous pouvez y fermer le menu en utilisant Navigator.pop
+                  Navigator.pop(context);
+                });
               },
             ),
             ListTile(
@@ -204,7 +208,11 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ScreenCagnotte(vendeurId: vendeurId, token: widget.token)),
-                );
+                ).then((_) {
+                  // Cette fonction sera appelée lorsque vous reviendrez de la page ScreenCagnotte
+                  // Vous pouvez y fermer le menu en utilisant Navigator.pop
+                  Navigator.pop(context);
+                });
               },
             ),
           ],
@@ -212,28 +220,32 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
       ),
       body: Center(
         child: SizedBox(
-          width: 350,
           child: ListView.builder(
             itemCount: _products.length,
             itemBuilder: (context, index) {
               final produit = _products[index];
-
               return Card(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('images/${produit.nom}.jpg'),
+                      Container(
+                        width: 55, // Ajustez la largeur du carré selon vos préférences
+                        height: 55, // Ajustez la hauteur du carré selon vos préférences
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('images/${produit.nom}.jpg'),
+                            fit: BoxFit.cover, // Ajustez le mode de redimensionnement selon vos préférences
+                          ),
+                        ),
                       ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           produit.nom,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ),
                       FutureBuilder<int>(
@@ -250,24 +262,43 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
                             return Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove),
-                                  onPressed: () {
-                                    _decrementVente(produit.id);
-                                  },
+                                Container(
+                                  width: 40, // Ajustez la largeur selon vos préférences
+                                  height: 40, // Ajustez la hauteur selon vos préférences
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.blue, // Couleur du cercle
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.remove),
+                                    onPressed: () {
+                                      _decrementVente(produit.id);
+                                    },
+                                    color: Colors.white, // Couleur de l'icône
+                                  ),
                                 ),
+                                SizedBox(width: 10),
                                 Text(
                                   '${snapshot.data}',
                                   style: TextStyle(fontSize: 18),
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.add),
-                                  onPressed: () {
-                                    _addVente(produit);
-                                  },
-                                  // Désactiver le bouton d'ajout de vente pendant la mise à jour de la cagnotte
-                                  // en vérifiant la valeur de _isUpdatingCagnotte
-                                  disabledColor: _isUpdatingCagnotte ? Colors.grey : null,
+                                SizedBox(width: 10),
+                                Container(
+                                  width: 40, // Ajustez la largeur selon vos préférences
+                                  height: 40, // Ajustez la hauteur selon vos préférences
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.blue, // Couleur du cercle
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.add),
+                                    onPressed: () {
+                                      _addVente(produit);
+                                    },
+                                    // Désactiver le bouton d'ajout de vente pendant la mise à jour de la cagnotte
+                                    // en vérifiant la valeur de _isUpdatingCagnotte
+                                    disabledColor: _isUpdatingCagnotte ? Colors.grey : null,
+                                  ),
                                 ),
                               ],
                             );

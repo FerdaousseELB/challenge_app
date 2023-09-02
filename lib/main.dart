@@ -19,6 +19,7 @@ class ChallengeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Challenge App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
