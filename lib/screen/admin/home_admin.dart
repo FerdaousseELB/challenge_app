@@ -1,3 +1,4 @@
+import 'package:challenge_app/screen/admin/screen_store.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -93,22 +94,28 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.add_location),
-            title: Text('Ajout de Point de Vente'),
+            leading: Icon(Icons.location_on),
+            title: Text('Points de Vente'),
             onTap: () {
-              // Mettez ici la logique pour gérer la navigation vers la page d'ajout de Point de Vente
-            },
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ScreenStore(token: widget.token)),
+              ).then((_) {
+                // Cette fonction sera appelée lorsque vous reviendrez de la page ScreenVente
+                // Vous pouvez y fermer le menu en utilisant Navigator.pop
+                Navigator.pop(context);
+              });},
           ),
           ListTile(
-            leading: Icon(Icons.person_add),
-            title: Text('Ajout de Gérant'),
+            leading: Icon(Icons.person_pin),
+            title: Text('Gérants'),
             onTap: () {
               // Mettez ici la logique pour gérer la navigation vers la page d'ajout de Gérant
             },
           ),
           ListTile(
-            leading: Icon(Icons.shopping_cart),
-            title: Text('Ajout de Vendeur'),
+            leading: Icon(Icons.person),
+            title: Text('Vendeurs'),
             onTap: () {
               // Mettez ici la logique pour gérer la navigation vers la page d'ajout de Vendeur
             },

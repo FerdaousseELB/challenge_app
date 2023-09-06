@@ -109,50 +109,6 @@ class _HomeVendeurPageState extends State<HomeVendeurPage> {
     }
   }
 
-  /*void _addVente(Produit produit) async {
-    final user = FirebaseAuth.instance.currentUser;
-    final email = user?.email ?? "";
-
-    final vendeur = await VendeurService.getVendeurByEmail(email, widget.token);
-
-    if (vendeur != null) {
-      if (!_isUpdatingCagnotte) { // Vérifier si la cagnotte n'est pas en cours de mise à jour
-        setState(() {
-          _isUpdatingCagnotte = true; // Mettre à jour le booléen pour indiquer que la cagnotte est en cours de mise à jour
-        });
-
-        final ventes = await VenteService.fetchVentes(widget.token);
-
-        int maxId = 0;
-        for (var vente in ventes) {
-          if (vente.id > maxId) {
-            maxId = vente.id;
-          }
-        }
-
-        final nouvelleVente = Vente(
-          id: maxId + 1,
-          produitId: produit.id,
-          vendeurId: vendeur.id,
-          heureDeVente: DateTime.now().toUtc(),
-        );
-
-        await VenteService.addVente(nouvelleVente, widget.token);
-
-        final moisEnCours = '${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}';
-
-        final nouvelleCagnotte = (vendeur.cagnottes[moisEnCours] ?? 0) + 2.5;
-        await VendeurService.updateCagnotte(vendeur.id, moisEnCours, nouvelleCagnotte, widget.token);
-
-        setState(() {
-          vendeur.cagnottes[moisEnCours] = nouvelleCagnotte;
-          _cagnotteMoisEnCours = nouvelleCagnotte;
-          _isUpdatingCagnotte = false; // Mettre à jour le booléen pour indiquer que la cagnotte a fini d'être mise à jour
-        });
-      }
-    }
-  }*/
-
   void _addVente(Produit produit) async {
     final user = FirebaseAuth.instance.currentUser;
     final email = user?.email ?? "";
