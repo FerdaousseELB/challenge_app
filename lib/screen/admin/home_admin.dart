@@ -146,7 +146,6 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -212,9 +211,17 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                 .pointDeVenteId == pointDeVente.id)
                 .length;
 
-            return ListTile(
-              title: Text(pointDeVente.nom, style: TextStyle(color: _getPointDeVenteTextColor(index))),
-              subtitle: Text('Nombre de ventes: $nombreDeVentes', style: TextStyle(color: _getPointDeVenteTextColor(index))),
+            return Card(
+              elevation: 3, // L'ombre de la carte
+              margin: EdgeInsets.all(8), // Marge autour de la carte
+              child: ListTile(
+                title: Text(pointDeVente.nom,
+                    style: TextStyle(
+                        color: _getPointDeVenteTextColor(index))),
+                subtitle: Text('Nombre de ventes: $nombreDeVentes',
+                    style: TextStyle(
+                        color: _getPointDeVenteTextColor(index))),
+              ),
             );
           },
         ),
@@ -232,13 +239,22 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
         SizedBox(height: 8),
         ListView.builder(
           shrinkWrap: true,
-          itemCount: vendeursAvecVentes.length > 3 ? 3 : vendeursAvecVentes.length,
+          itemCount: vendeursAvecVentes.length > 3
+              ? 3
+              : vendeursAvecVentes.length,
           itemBuilder: (context, index) {
             final vendeurAvecVentes = vendeursAvecVentes[index];
 
-            return ListTile(
-              title: Text(vendeurAvecVentes.vendeur.nom, style: TextStyle(color: _getVendeurTextColor(index))),
-              subtitle: Text('Nombre de ventes: ${vendeurAvecVentes.nombreDeVentes}', style: TextStyle(color: _getVendeurTextColor(index))),
+            return Card(
+              elevation: 3, // L'ombre de la carte
+              margin: EdgeInsets.all(8), // Marge autour de la carte
+              child: ListTile(
+                title: Text(vendeurAvecVentes.vendeur.nom,
+                    style: TextStyle(color: _getVendeurTextColor(index))),
+                subtitle: Text(
+                    'Nombre de ventes: ${vendeurAvecVentes.nombreDeVentes}',
+                    style: TextStyle(color: _getVendeurTextColor(index))),
+              ),
             );
           },
         ),
