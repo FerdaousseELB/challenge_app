@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ScreenVendeurs extends StatelessWidget {
+  final String? token;
+
+  ScreenVendeurs({this.token});
   @override
   Widget build(BuildContext context) {
     return Scaffold(

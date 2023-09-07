@@ -227,7 +227,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ScreenGerants()), // Utilisez votre propre logique de gestion des Gérants ici
+                MaterialPageRoute(builder: (context) => ScreenGerants(token: widget.token)), // Utilisez votre propre logique de gestion des Gérants ici
               ).then((_) {
                 Navigator.pop(context);
               });
@@ -239,7 +239,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ScreenVendeurs()), // Utilisez votre propre logique de gestion des Gérants ici
+                MaterialPageRoute(builder: (context) => ScreenVendeurs(token: widget.token)), // Utilisez votre propre logique de gestion des Gérants ici
               ).then((_) {
                 Navigator.pop(context);
               });
