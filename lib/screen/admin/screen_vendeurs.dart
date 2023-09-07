@@ -3,16 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../model/VendeurAvecVentes.dart';
 import '../../model/store_model.dart';
 import '../../model/vendeur_model.dart';
 import '../../model/vente_model.dart';
-
-class VendeurAvecVentes {
-  final Vendeur vendeur;
-  final int nombreDeVentes;
-
-  VendeurAvecVentes(this.vendeur, this.nombreDeVentes);
-}
 
 class ScreenVendeurs extends StatefulWidget {
   final String? token;
