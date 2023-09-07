@@ -5,6 +5,15 @@ import 'dart:convert';
 
 import '../../model/store_model.dart';
 import '../../model/vendeur_model.dart';
+import '../../model/vente_model.dart';
+
+
+class VendeurAvecVentes {
+  final Vendeur vendeur;
+  final int nombreDeVentes;
+
+  VendeurAvecVentes(this.vendeur, this.nombreDeVentes);
+}
 
 class ScreenVendeurs extends StatefulWidget {
   final String? token;
@@ -24,12 +33,14 @@ class _ScreenVendeursState extends State<ScreenVendeurs> {
   String? selectedPointDeVente;
   List<String> pointsDeVenteDisponibles = [];
   List<Store> pointsDeVente = [];
+  List<VendeurAvecVentes> vendeursAvecVentes = [];
 
   @override
   void initState() {
     super.initState();
     fetchVendeurs();
     fetchPointsDeVente();
+    fetchVentes();
   }
 
   Future<void> fetchVendeurs() async {
@@ -79,6 +90,30 @@ class _ScreenVendeursState extends State<ScreenVendeurs> {
     );
 
     return store.id;
+  }
+
+  Future<void> fetchVentes() async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json?auth=${widget.token}'));
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = json.decode(response.body);
+
+      if (data != null) {
+        final nonNullData = data.where((item) => item != null).toList();
+        final ventes = nonNullData
+            .map((vente) => Vente.fromJson(vente))
+            .toList();
+
+        // Compter le nombre de ventes pour chaque vendeur
+        vendeursAvecVentes = vendeurs.map((vendeur) {
+          final nombreDeVentes = ventes.where((vente) => vente.vendeurId == vendeur.id).length;
+          return VendeurAvecVentes(vendeur, nombreDeVentes);
+        }).toList();
+
+        setState(() {});
+      }
+    } else {
+      print('Erreur lors de la récupération des ventes : ${response.statusCode}');
+    }
   }
 
   Future<void> createVendeur() async {
@@ -158,12 +193,15 @@ class _ScreenVendeursState extends State<ScreenVendeurs> {
         title: Text('Vendeurs'),
       ),
       body: ListView.builder(
-        itemCount: vendeurs.length,
+        itemCount: vendeursAvecVentes.length,
         itemBuilder: (context, index) {
-          final vendeur = vendeurs[index];
+          final vendeurAvecVentes = vendeursAvecVentes[index];
+          final vendeur = vendeurAvecVentes.vendeur;
+          final nombreDeVentes = vendeurAvecVentes.nombreDeVentes;
           return ListTile(
             title: Text(vendeur.nom),
             subtitle: Text(vendeur.mail),
+            trailing: Text('$nombreDeVentes ventes'),
           );
         },
       ),
