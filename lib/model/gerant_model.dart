@@ -19,4 +19,13 @@ class Gerant {
       pointDeVenteId: json['point_de_vente_id']
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'nom': nom,
+      'mail': mail,
+      'point_de_vente_id': pointDeVenteId,
+    };
+  }
 }
