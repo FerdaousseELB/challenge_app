@@ -26,9 +26,9 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
   @override
   void initState() {
     super.initState();
-    fetchPointsDeVente();
-    fetchVentes();
+    fetchVentes(); // Chargez d'abord les ventes et les vendeurs
     fetchVendeurs();
+    fetchPointsDeVente();
   }
 
   Future<void> fetchPointsDeVente() async {
@@ -44,6 +44,34 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
           pointsDeVente = nonNullData
               .map((store) => Store.fromJson(store))
               .toList();
+
+          // Triez la liste des points de vente par ordre décroissant du nombre de ventes
+          pointsDeVente.sort((a, b) {
+            final nombreDeVentesA = ventes.where((vente) =>
+            vendeurs.firstWhere(
+                  (vendeur) => vendeur.id == vente.vendeurId,
+              orElse: () => Vendeur(
+                id: -1,
+                nom: '',
+                mail: '',
+                pointDeVenteId: -1,
+                cagnottes: {},
+              ),
+            ).pointDeVenteId == a.id).length;
+            final nombreDeVentesB = ventes.where((vente) =>
+            vendeurs.firstWhere(
+                  (vendeur) => vendeur.id == vente.vendeurId,
+              orElse: () => Vendeur(
+                id: -1,
+                nom: '',
+                mail: '',
+                pointDeVenteId: -1,
+                cagnottes: {},
+              ),
+            ).pointDeVenteId == b.id).length;
+
+            return nombreDeVentesB.compareTo(nombreDeVentesA);
+          });
         });
       }
     }
@@ -102,8 +130,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                 itemBuilder: (context, index) {
                   final pointDeVente = pointsDeVente[index];
                   final nombreDeVentes = ventes.where((vente) =>
-                  vendeurs
-                      .firstWhere(
+                  vendeurs.firstWhere(
                         (vendeur) => vendeur.id == vente.vendeurId,
                     orElse: () => Vendeur(
                       id: -1,
@@ -112,9 +139,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                       pointDeVenteId: -1,
                       cagnottes: {},
                     ),
-                  )
-                      .pointDeVenteId == pointDeVente.id)
-                      .length;
+                  ).pointDeVenteId == pointDeVente.id).length;
 
                   return ListTile(
                     title: Text(pointDeVente.nom),
@@ -190,10 +215,9 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                 context,
                 MaterialPageRoute(builder: (context) => ScreenStore(token: widget.token)),
               ).then((_) {
-                // Cette fonction sera appelée lorsque vous reviendrez de la page ScreenVente
-                // Vous pouvez y fermer le menu en utilisant Navigator.pop
                 Navigator.pop(context);
-              });},
+              });
+            },
           ),
           ListTile(
             leading: Icon(Icons.person_pin),
