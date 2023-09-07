@@ -35,4 +35,19 @@ class Vendeur {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> cagnottesJson = {};
+    cagnottes.forEach((key, value) {
+      cagnottesJson[key] = value;
+    });
+
+    return {
+      'ID': id,
+      'nom': nom,
+      'mail': mail,
+      'point_de_vente_id': pointDeVenteId,
+      'cagnottes': cagnottesJson,
+    };
+  }
+
 }
