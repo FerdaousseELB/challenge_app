@@ -20,6 +20,9 @@ class _ScreenStoreState extends State<ScreenStore> {
   TextEditingController _nomController = TextEditingController();
   TextEditingController _adresseController = TextEditingController();
 
+  // Ajoutez la clé de formulaire ici
+  final _formKey = GlobalKey<FormState>();
+
   Future<List<PointDeVenteInfo>> fetchPointsDeVente() async {
     final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/pointsDeVente.json?auth=${widget.token}'));
     if (response.statusCode == 200) {
@@ -132,31 +135,6 @@ class _ScreenStoreState extends State<ScreenStore> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nomController,
-                    decoration: InputDecoration(labelText: 'Nom du Point de Vente'),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _adresseController,
-                    decoration: InputDecoration(labelText: 'Adresse du Point de Vente'),
-                  ),
-                ),
-                SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: ajouterPointDeVente,
-                  child: Text('Ajouter'),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: FutureBuilder<List<PointDeVenteInfo>>(
               future: fetchPointsDeVente(),
@@ -194,6 +172,70 @@ class _ScreenStoreState extends State<ScreenStore> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Ajouter un Point de Vente'),
+                content: SingleChildScrollView(
+                  child: Form(
+                    // Utilisez la clé du formulaire ici
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _nomController,
+                          decoration: InputDecoration(labelText: 'Nom du Point de Vente'),
+                          // Vous pouvez ajouter des validateurs ici si nécessaire
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Veuillez entrer un nom.';
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _adresseController,
+                          decoration: InputDecoration(labelText: 'Adresse du Point de Vente'),
+                          // Vous pouvez ajouter des validateurs ici si nécessaire
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Veuillez entrer une adresse.';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Annuler'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Validez le formulaire avant d'ajouter le point de vente
+                      if (_formKey.currentState!.validate()) {
+                        // Ajoutez le point de vente ici
+                        ajouterPointDeVente();
+                        Navigator.of(context).pop(); // Fermez la boîte de dialogue
+                      }
+                    },
+                    child: Text('Ajouter'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
