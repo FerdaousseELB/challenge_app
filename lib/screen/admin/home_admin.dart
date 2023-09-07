@@ -1,6 +1,12 @@
 import 'package:challenge_app/screen/admin/screen_store.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import '../../model/store_model.dart';
+import '../../model/vendeur_model.dart';
+import '../../model/vente_model.dart';
 
 class HomeAdminPage extends StatefulWidget {
   final String? token;
@@ -13,6 +19,65 @@ class HomeAdminPage extends StatefulWidget {
 
 class _HomeAdminPageState extends State<HomeAdminPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Store> pointsDeVente = [];
+  List<Vente> ventes = [];
+  List<Vendeur> vendeurs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPointsDeVente();
+    fetchVentes();
+    fetchVendeurs();
+  }
+
+  Future<void> fetchPointsDeVente() async {
+    final response = await http.get(
+        Uri.parse(
+            'https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/pointsDeVente.json?auth=${widget.token}'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = json.decode(response.body);
+      if (data != null) {
+        setState(() {
+          final nonNullData = data.where((item) => item != null).toList();
+          pointsDeVente = nonNullData
+              .map((store) => Store.fromJson(store))
+              .toList();
+        });
+      }
+    }
+  }
+
+  Future<void> fetchVentes() async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/ventes.json?auth=${widget.token}'));
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = json.decode(response.body);
+      if (data != null) {
+        setState(() {
+          ventes = data
+              .where((item) => item != null)
+              .map((item) => Vente.fromJson(item))
+              .toList();
+        });
+      }
+    }
+  }
+
+  Future<void> fetchVendeurs() async {
+    final response = await http.get(Uri.parse('https://challenge-d50e0-default-rtdb.europe-west1.firebasedatabase.app/vendeurs.json?auth=${widget.token}'));
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = json.decode(response.body);
+      if (data != null) {
+        setState(() {
+          vendeurs = data
+              .where((item) => item != null)
+              .map((item) => Vendeur.fromJson(item))
+              .toList();
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +95,33 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Bonjour Admin',
-              style: TextStyle(fontSize: 24),
+            SizedBox(width: 8),
+            Expanded(
+              child: ListView.builder(
+                itemCount: pointsDeVente.length,
+                itemBuilder: (context, index) {
+                  final pointDeVente = pointsDeVente[index];
+                  final nombreDeVentes = ventes.where((vente) =>
+                  vendeurs
+                      .firstWhere(
+                        (vendeur) => vendeur.id == vente.vendeurId,
+                    orElse: () => Vendeur(
+                      id: -1,
+                      nom: '',
+                      mail: '',
+                      pointDeVenteId: -1,
+                      cagnottes: {},
+                    ),
+                  )
+                      .pointDeVenteId == pointDeVente.id)
+                      .length;
+
+                  return ListTile(
+                    title: Text(pointDeVente.nom),
+                    subtitle: Text('Nombre de ventes: $nombreDeVentes'),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -54,7 +143,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   _scaffoldKey.currentState?.openDrawer();
                 },
               ),
-              Text('Accueil Admin'),
+              Text('Tableau de bord'),
             ],
           ),
           Padding(
@@ -86,7 +175,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
               color: Colors.blue,
             ),
             child: Text(
-              'Menu Admin',
+              'Menu',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
