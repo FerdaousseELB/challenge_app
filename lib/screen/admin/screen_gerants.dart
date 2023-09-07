@@ -171,109 +171,6 @@ class _ScreenGerantsState extends State<ScreenGerants> {
       ),
       body: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text('Créer un Gérant'),
-                    content: SingleChildScrollView(
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            TextFormField(
-                              controller: _nomController,
-                              decoration: InputDecoration(
-                                labelText: 'Nom',
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un nom.';
-                                }
-                                return null;
-                              },
-                            ),
-                            TextFormField(
-                              controller: _mailController,
-                              decoration: InputDecoration(
-                                labelText: 'Mail',
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un mail.';
-                                }
-                                return null;
-                              },
-                            ),
-                            TextFormField(
-                              controller: _passwordController,
-                              decoration: InputDecoration(
-                                labelText: 'Mot de passe',
-                              ),
-                              obscureText: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un mot de passe.';
-                                }
-                                return null;
-                              },
-                            ),
-                            DropdownButtonFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Point de Vente',
-                              ),
-                              value: selectedPointDeVente,
-                              items: pointsDeVenteDisponibles
-                                  .map((point) => DropdownMenuItem(
-                                value: point,
-                                child: Text(point),
-                              ))
-                                  .toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedPointDeVente = value as String?;
-                                });
-                              },
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Veuillez sélectionner un point de vente.';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    actions: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Annuler'),
-                      ),
-                      ElevatedButton(
-                        onPressed: (pointsDeVenteDisponibles.isEmpty ||
-                            _nomController.text.isEmpty ||
-                            _mailController.text.isEmpty ||
-                            _passwordController.text.isEmpty)
-                            ? null
-                            : () {
-                          createGerant();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Créer Gérant'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            child: Text('Créer un Gérant'),
-          ),
           Expanded(
             child: ListView.builder(
               itemCount: gerants.length,
@@ -288,12 +185,109 @@ class _ScreenGerantsState extends State<ScreenGerants> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Créer un Gérant'),
+                content: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _nomController,
+                          decoration: InputDecoration(
+                            labelText: 'Nom',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer un nom.';
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _mailController,
+                          decoration: InputDecoration(
+                            labelText: 'Mail',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer un mail.';
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Mot de passe',
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer un mot de passe.';
+                            }
+                            return null;
+                          },
+                        ),
+                        DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            labelText: 'Point de Vente',
+                          ),
+                          value: selectedPointDeVente,
+                          items: pointsDeVenteDisponibles
+                              .map((point) => DropdownMenuItem(
+                            value: point,
+                            child: Text(point),
+                          ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPointDeVente = value as String?;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Veuillez sélectionner un point de vente.';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Annuler'),
+                  ),
+                  ElevatedButton(
+                    onPressed: (pointsDeVenteDisponibles.isEmpty ||
+                        _nomController.text.isEmpty ||
+                        _mailController.text.isEmpty ||
+                        _passwordController.text.isEmpty)
+                        ? null
+                        : () {
+                      createGerant();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Créer Gérant'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: ScreenGerants(),
-  ));
 }
