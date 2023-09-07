@@ -7,7 +7,6 @@ import '../../model/store_model.dart';
 import '../../model/vendeur_model.dart';
 import '../../model/vente_model.dart';
 
-
 class VendeurAvecVentes {
   final Vendeur vendeur;
   final int nombreDeVentes;
@@ -109,6 +108,9 @@ class _ScreenVendeursState extends State<ScreenVendeurs> {
           return VendeurAvecVentes(vendeur, nombreDeVentes);
         }).toList();
 
+        // Triez la liste des vendeurs en ordre décroissant en fonction du nombre de ventes
+        vendeursAvecVentes.sort((a, b) => b.nombreDeVentes.compareTo(a.nombreDeVentes));
+
         setState(() {});
       }
     } else {
@@ -198,13 +200,39 @@ class _ScreenVendeursState extends State<ScreenVendeurs> {
           final vendeurAvecVentes = vendeursAvecVentes[index];
           final vendeur = vendeurAvecVentes.vendeur;
           final nombreDeVentes = vendeurAvecVentes.nombreDeVentes;
+
+          // Définissez des couleurs pour les trois premiers vendeurs
+          Color itemColor;
+          if (index == 0) {
+            itemColor = Colors.green; // Couleur pour le premier vendeur
+          } else if (index == 1) {
+            itemColor = Colors.blue; // Couleur pour le deuxième vendeur
+          } else if (index == 2) {
+            itemColor = Colors.red; // Couleur pour le troisième vendeur
+          } else {
+            itemColor = Colors.black; // Couleur par défaut pour les autres vendeurs
+          }
+
           return ListTile(
-            title: Text(vendeur.nom),
+            title: Text(
+              vendeur.nom,
+              style: TextStyle(
+                color: itemColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             subtitle: Text(vendeur.mail),
-            trailing: Text('$nombreDeVentes ventes'),
+            trailing: Text(
+              '$nombreDeVentes ventes',
+              style: TextStyle(
+                color: itemColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           );
         },
       ),
+      // Le reste de votre code reste inchangé
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
