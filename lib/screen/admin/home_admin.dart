@@ -1,4 +1,6 @@
+import 'package:challenge_app/screen/admin/screen_gerants.dart';
 import 'package:challenge_app/screen/admin/screen_store.dart';
+import 'package:challenge_app/screen/admin/screen_vendeurs.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
@@ -223,14 +225,24 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
             leading: Icon(Icons.person_pin),
             title: Text('Gérants'),
             onTap: () {
-              // Mettez ici la logique pour gérer la navigation vers la page d'ajout de Gérant
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ScreenGerants()), // Utilisez votre propre logique de gestion des Gérants ici
+              ).then((_) {
+                Navigator.pop(context);
+              });
             },
           ),
           ListTile(
             leading: Icon(Icons.person),
             title: Text('Vendeurs'),
             onTap: () {
-              // Mettez ici la logique pour gérer la navigation vers la page d'ajout de Vendeur
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ScreenVendeurs()), // Utilisez votre propre logique de gestion des Gérants ici
+              ).then((_) {
+                Navigator.pop(context);
+              });
             },
           ),
         ],
